@@ -4,6 +4,7 @@
 #include "NTPClient.h"
 #include "DFRobotDFPlayerMini.h"
 
+
 #if (defined(ARDUINO_AVR_UNO) || defined(ESP8266))  // Using a soft serial port
 #include <SoftwareSerial.h>
 SoftwareSerial softSerial(/*rx =*/16, /*tx =*/17);
@@ -30,8 +31,10 @@ int analogPin = 34;
 const long utcOffsetInSeconds = 3600; // Offset in second
 int Hour = 0;
 //========================USEFUL VARIABLES=============================
-int UTC = 1; // UTC + value in hour - Summer time
+int UTC = 1; // UTC + value in hour -  2 = Summer time
 int Display_backlight = 3; // Set displays brightness 0 to 7;
+int gmtOffset_sec = 3600;
+int daylightOffset_sec = 3600;
 bool daylightSaving = true;
 //======================================================================
 
@@ -43,7 +46,8 @@ TM1637Display red2(red_CLK, red2_DIO);
 TM1637Display red3(red_CLK, red3_DIO);
 
 WiFiUDP ntpUDP;
-NTPClient timeClient(ntpUDP, "pool.ntp.org", utcOffsetInSeconds*UTC, daylightSaving);
+// NTPClient timeClient(ntpUDP, "pool.ntp.org", utcOffsetInSeconds*UTC, daylightSaving);
+NTPClient timeClient(ntpUDP, "fr.pool.ntp.org", gmtOffset_sec, daylightOffset_sec);
 DFRobotDFPlayerMini myDFPlayer;  // declare mp3 player
 
 void colorOne() {
