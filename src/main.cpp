@@ -33,8 +33,8 @@ int Hour = 0;
 //========================USEFUL VARIABLES=============================
 int UTC = 1; // UTC + value in hour -  2 = Summer time
 int Display_backlight = 3; // Set displays brightness 0 to 7;
-int gmtOffset_sec = 3600;
-int daylightOffset_sec = 3600;
+int winterOffset_sec = 3600;
+int summerOffset_sec = 7200;
 int updateInterval = 60000;
 //======================================================================
 
@@ -46,11 +46,12 @@ TM1637Display red2(red_CLK, red2_DIO);
 TM1637Display red3(red_CLK, red3_DIO);
 
 WiFiUDP ntpUDP;
-NTPClient timeClient(ntpUDP, "pool.ntp.org", utcOffsetInSeconds*UTC, updateInterval);
+NTPClient timeClient(ntpUDP, "fr.pool.ntp.org", (utcOffsetInSeconds * UTC), updateInterval);
 
 DFRobotDFPlayerMini myDFPlayer;  // declare mp3 player
 
 void colorOne() {
+  pixels.clear();
   for(int i=0; i<12; i++){ pixels.setPixelColor(i, pixels.Color(255,0,0)); }
   for(int i=12; i<24; i++){ pixels.setPixelColor(i, pixels.Color(160,160,0)); }
   for(int i=24; i<NUMPIXELS; i++){ pixels.setPixelColor(i, pixels.Color(255,0,0)); }
@@ -58,10 +59,63 @@ void colorOne() {
 }
 
 void colorTwo() {
+  pixels.clear();
   for(int i=0; i<12; i++) { pixels.setPixelColor(i, pixels.Color(0,0,255)); }
   for(int i=12; i<24; i++) { pixels.setPixelColor(i, pixels.Color(200,250,255)); }
   for(int i=24; i<NUMPIXELS; i++){ pixels.setPixelColor(i, pixels.Color(0,0,255)); }
   pixels.show();
+}
+
+void colorThree() {
+    pixels.clear();
+    for(int i=0; i<7;i++){ pixels.setPixelColor(i, pixels.Color(255,0,0)); }
+    for(int i=7; i<13;i++){ pixels.setPixelColor(i, pixels.Color(160,160,0)); }
+    for(int i=13; i<19;i++){ pixels.setPixelColor(i, pixels.Color(255,0,0)); }
+    for(int i=19; i<25;i++){ pixels.setPixelColor(i, pixels.Color(255,0,0)); }
+    for(int i=25; i<31;i++){ pixels.setPixelColor(i, pixels.Color(255,0,0)); }
+    for(int i=31; i<37;i++){ pixels.setPixelColor(i, pixels.Color(160,160,0)); }
+    pixels.show();
+}
+void colorFour() {
+    pixels.clear();
+    for(int i=0; i<7;i++){ pixels.setPixelColor(i, pixels.Color(0,0,255)); }
+    for(int i=7; i<13;i++){ pixels.setPixelColor(i, pixels.Color(200,250,255)); }
+    for(int i=13; i<19;i++){ pixels.setPixelColor(i, pixels.Color(0,0,255)); }
+    for(int i=19; i<25;i++){ pixels.setPixelColor(i, pixels.Color(0,0,255)); }
+    for(int i=25; i<31;i++){ pixels.setPixelColor(i, pixels.Color(200,250,255)); }
+    for(int i=31; i<37;i++){ pixels.setPixelColor(i, pixels.Color(0,0,255)); }
+    pixels.show();
+}
+void colorFive() {
+    pixels.clear();
+    for(int i=0; i<7;i++){ pixels.setPixelColor(i, pixels.Color(255,0,10)); }
+    for(int i=7; i<13;i++){pixels.setPixelColor(i, pixels.Color(0,10,255)); }
+    for(int i=13; i<19;i++){ pixels.setPixelColor(i, pixels.Color(255,0,10)); }
+    for(int i=19; i<25;i++){ pixels.setPixelColor(i, pixels.Color(255,0,10)); }
+    for(int i=25; i<31;i++){ pixels.setPixelColor(i, pixels.Color(0,10,255)); }
+    for(int i=31; i<37;i++){ pixels.setPixelColor(i, pixels.Color(255,0,10)); }
+    pixels.show();
+}
+void colorSix() {
+    pixels.clear();
+    for (int i = 0; i < PIXELROWS; i++) { pixels.setPixelColor(i, pixels.Color(255, 99, 71)); }
+    for (int i = PIXELROWS; i < (PIXELROWS * 2); i++) { pixels.setPixelColor(i, pixels.Color(127, 0, 255)); }
+    for (int i = (PIXELROWS * 2); i < NUMPIXELS; i++) { pixels.setPixelColor(i, pixels.Color(255, 99, 71)); }
+    pixels.show();
+}
+void colorSeven() {
+    pixels.clear();
+    for (int i = 0; i < PIXELROWS; i++) { pixels.setPixelColor(i, pixels.Color(124, 252, 0)); }
+    for (int i = PIXELROWS; i < (PIXELROWS * 2); i++) { pixels.setPixelColor(i, pixels.Color(255, 150, 0)); }
+    for (int i = (PIXELROWS * 2); i < NUMPIXELS; i++) { pixels.setPixelColor(i, pixels.Color(124, 252, 0)); }
+    pixels.show();
+}
+void colorEight() {
+    pixels.clear();
+    for (int i = 0; i < PIXELROWS; i++) { pixels.setPixelColor(i, pixels.Color(70, 0, 150)); }
+    for (int i = PIXELROWS; i < (PIXELROWS * 2); i++) { pixels.setPixelColor(i, pixels.Color(170, 100, 255)); }
+    for (int i = (PIXELROWS * 2); i < NUMPIXELS; i++) { pixels.setPixelColor(i, pixels.Color(70, 0, 150)); }
+    pixels.show();
 }
 
 void clearColor() {
@@ -135,9 +189,15 @@ red2.showNumberDecEx(currentYear,0b00000000,true);
 red3.showNumberDecEx(timeClient.getHours(),0b01000000,true,2,0);
 red3.showNumberDecEx(timeClient.getMinutes(),0b01000000,true,2,2);
 
-if((currentMonth*30 + monthDay) >= 121 && (currentMonth*30 + monthDay) < 331){
-timeClient.setTimeOffset(utcOffsetInSeconds*UTC);} // Change daylight saving time - Summer
-else {timeClient.setTimeOffset((utcOffsetInSeconds*UTC) - 3600);} // Change daylight saving time - Winter
+// 2024 121/331 | 2025 120/330 | 2026 119/325 | 2027 118/331 | 2028 116/329 | 2029 115/328 | 2030 121/327 | 2031 120/326 | 2032 118/331 | 2033 117/330 | 2024 116/329 | 2035 115/328 | 2036 120/326
+int summerDayStart[13] = {121, 120, 119, 118, 116, 115, 121, 120, 118, 117, 116, 115, 120};
+int winterDayStart[13] = {331, 330, 325, 331, 329, 328, 327, 326, 331, 330, 329, 328, 326};
+int startEndIndice = currentYear - 2024;
+if (startEndIndice > sizeof(summerDayStart)) startEndIndice = startEndIndice - sizeof(summerDayStart);
+
+if((currentMonth*30 + monthDay) >= summerDayStart[startEndIndice] && (currentMonth*30 + monthDay) < winterDayStart[startEndIndice]){
+  timeClient.setTimeOffset(summerOffset_sec);} // Change UTC offset = UTC+2 - Summer
+else {timeClient.setTimeOffset((winterOffset_sec));} // Unchange UTC offset = UTC+1 - Winter
 
 
 if(timeClient.getHours()>=13){
@@ -169,13 +229,7 @@ else{
 
   switch (var) {
   case 0: 
-    for(int i=0; i<7;i++){ pixels.setPixelColor(i, pixels.Color(255,0,0)); }
-    for(int i=7; i<13;i++){ pixels.setPixelColor(i, pixels.Color(160,160,0)); }
-    for(int i=13; i<19;i++){ pixels.setPixelColor(i, pixels.Color(255,0,0)); }
-    for(int i=19; i<25;i++){ pixels.setPixelColor(i, pixels.Color(255,0,0)); }
-    for(int i=25; i<31;i++){ pixels.setPixelColor(i, pixels.Color(255,0,0)); }
-    for(int i=31; i<37;i++){ pixels.setPixelColor(i, pixels.Color(160,160,0)); }
-    pixels.show();
+    colorThree();
     break;
 
   case 1:
@@ -183,13 +237,7 @@ else{
     break;
 
   case 2:
-    for(int i=0; i<7;i++){ pixels.setPixelColor(i, pixels.Color(0,0,255)); }
-    for(int i=7; i<13;i++){ pixels.setPixelColor(i, pixels.Color(200,250,255)); }
-    for(int i=13; i<19;i++){ pixels.setPixelColor(i, pixels.Color(0,0,255)); }
-    for(int i=19; i<25;i++){ pixels.setPixelColor(i, pixels.Color(0,0,255)); }
-    for(int i=25; i<31;i++){ pixels.setPixelColor(i, pixels.Color(200,250,255)); }
-    for(int i=31; i<37;i++){ pixels.setPixelColor(i, pixels.Color(0,0,255)); }
-    pixels.show();
+    colorFour();
     break;
 
   case 3:
@@ -197,14 +245,7 @@ else{
     break;
 
   case 4:
-    pixels.clear();
-    for(int i=0; i<7;i++){ pixels.setPixelColor(i, pixels.Color(255,0,10)); }
-    for(int i=7; i<13;i++){pixels.setPixelColor(i, pixels.Color(0,10,255)); }
-    for(int i=13; i<19;i++){ pixels.setPixelColor(i, pixels.Color(255,0,10)); }
-    for(int i=19; i<25;i++){ pixels.setPixelColor(i, pixels.Color(255,0,10)); }
-    for(int i=25; i<31;i++){ pixels.setPixelColor(i, pixels.Color(0,10,255)); }
-    for(int i=31; i<37;i++){ pixels.setPixelColor(i, pixels.Color(255,0,10)); }
-    pixels.show();
+    colorFive();
     break;
 
   case 5:
@@ -212,11 +253,7 @@ else{
     break;
 
   case 6:
-    pixels.clear();
-    for (int i = 0; i < PIXELROWS; i++) { pixels.setPixelColor(i, pixels.Color(255, 99, 71)); }
-    for (int i = PIXELROWS; i < (PIXELROWS * 2); i++) { pixels.setPixelColor(i, pixels.Color(127, 0, 255)); }
-    for (int i = (PIXELROWS * 2); i < NUMPIXELS; i++) { pixels.setPixelColor(i, pixels.Color(255, 99, 71)); }
-    pixels.show();
+    colorSix();
     break;
 
   case 7:
@@ -224,11 +261,7 @@ else{
     break;
 
   case 8:
-    pixels.clear();
-    for (int i = 0; i < PIXELROWS; i++) { pixels.setPixelColor(i, pixels.Color(124, 252, 0)); }
-    for (int i = PIXELROWS; i < (PIXELROWS * 2); i++) { pixels.setPixelColor(i, pixels.Color(255, 150, 0)); }
-    for (int i = (PIXELROWS * 2); i < NUMPIXELS; i++) { pixels.setPixelColor(i, pixels.Color(124, 252, 0)); }
-    pixels.show();
+    colorSeven();
     break;
 
   case 9:
@@ -236,11 +269,7 @@ else{
     break;
 
   case 10:
-    pixels.clear();
-    for (int i = 0; i < PIXELROWS; i++) { pixels.setPixelColor(i, pixels.Color(70, 0, 150)); }
-    for (int i = PIXELROWS; i < (PIXELROWS * 2); i++) { pixels.setPixelColor(i, pixels.Color(170, 100, 255)); }
-    for (int i = (PIXELROWS * 2); i < NUMPIXELS; i++) { pixels.setPixelColor(i, pixels.Color(70, 0, 150)); }
-    pixels.show();
+    colorEight();
     break;
 
   case 11:
