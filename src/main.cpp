@@ -35,7 +35,7 @@ int UTC = 1; // UTC + value in hour -  2 = Summer time
 int Display_backlight = 3; // Set displays brightness 0 to 7;
 int gmtOffset_sec = 3600;
 int daylightOffset_sec = 3600;
-bool daylightSaving = true;
+int updateInterval = 60000;
 //======================================================================
 
 // When setting up the NeoPixel library, we tell it how many pixels,
@@ -46,8 +46,8 @@ TM1637Display red2(red_CLK, red2_DIO);
 TM1637Display red3(red_CLK, red3_DIO);
 
 WiFiUDP ntpUDP;
-// NTPClient timeClient(ntpUDP, "pool.ntp.org", utcOffsetInSeconds*UTC, daylightSaving);
-NTPClient timeClient(ntpUDP, "fr.pool.ntp.org", gmtOffset_sec, daylightOffset_sec);
+NTPClient timeClient(ntpUDP, "pool.ntp.org", utcOffsetInSeconds*UTC, updateInterval);
+
 DFRobotDFPlayerMini myDFPlayer;  // declare mp3 player
 
 void colorOne() {
